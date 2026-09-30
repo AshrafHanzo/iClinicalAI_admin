@@ -1,0 +1,232 @@
+
+Scope of Work
+iClinicalAi Platform – MVP Development
+1. Project Objective
+To develop an AI-assisted clinical research automation platform that supports clinical trial design, clinical trial search, clinical data management, biostatistics, safety, recruitment, prediction, and documentation support.
+The platform will act as an Ai co-pilot for clinical research teams, CROs, sponsors, SMEs, data managers, biostatisticians, safety teams, and medical writers.
+This scope is based on the iClinicalAi product concept covering DESIGN, RECRUIT, MANAGE, ANALYSE, SAFETY, PREDICT, and FIND modules. 
+2. MVP Modules to be Developed
+Module 1: User Management
+Features
+Admin login 
+User login 
+Role-based access 
+User profile management 
+Password reset 
+Activity tracking 
+User Roles
+Super Admin 
+IDDCR SME 
+Developer/Admin 
+Client/User 
+Reviewer 
+
+
+
+
+Module 2: AI Assistant Dashboard
+Features
+Central AI chatbot interface 
+User can ask clinical research-related questions 
+User can upload documents 
+AI should summarize uploaded documents 
+AI should extract key information 
+AI should generate draft outputs 
+Conversation history should be saved 
+Document Types
+Protocol 
+Clinical study report 
+SAP 
+TLF shell 
+AE/SAE narrative 
+CRF 
+Data management plan 
+Trial registry data 
+Module 3: iClinicalAi FIND
+Purpose
+Clinical trial search and registry intelligence.
+Features
+Search clinical trials by indication, phase, sponsor, country, status 
+Extract trial details 
+Summarize trial information 
+Compare similar trials 
+Generate competitor trial landscape 
+Identify recruiting/ongoing trials 
+Export summary as PDF/Word 
+Output
+Trial summary report 
+Trial comparison table 
+Competitor landscape summary 
+Module 4: iClinicalAi DESIGN
+Purpose
+Protocol and study design support.
+Features
+Upload protocol or protocol synopsis 
+Generate protocol summary 
+Extract objectives, endpoints, eligibility criteria 
+Review inclusion/exclusion criteria 
+Identify missing sections or gaps 
+Generate feasibility checklist 
+Suggest study design considerations 
+Compare with similar trials 
+Output
+Protocol summary 
+Feasibility checklist 
+Gap analysis report 
+Study design recommendation note 
+Module 5: iClinicalAi MANAGE
+Purpose
+Clinical Data Management support.
+Features
+CRF review support 
+Edit check suggestion 
+Data query wording assistance 
+Data cleaning checklist 
+Medical coding support notes 
+Query trend summary 
+Data review summary 
+Upload sample data file and generate observations 
+Output
+Edit check draft 
+Query text suggestions 
+Data cleaning checklist 
+CDM review summary 
+Module 6: iClinicalAi ANALYZE
+Purpose
+Biostatistics and clinical analytics support.
+Features
+SAP outline generation 
+TLF shell draft support 
+Endpoint summary 
+Descriptive statistics explanation 
+Dataset review checklist 
+Clinical result interpretation support 
+CSR result section draft support 
+Basic dashboard for study metrics 
+Output
+SAP outline 
+TLF shell draft 
+Analysis summary 
+CSR result draft 
+Module 7: iClinicalAi SAFETY
+Purpose
+Safety and pharmacovigilance writing support.
+Features
+AE/SAE narrative drafting 
+Safety case summary 
+Seriousness/causality checklist 
+MedDRA coding support note 
+Aggregate safety summary 
+Safety trend dashboard 
+Medical review note generation 
+Output
+SAE narrative draft 
+Safety summary 
+Medical review note 
+Signal review summary 
+Module 8: iClinicalAi RECRUIT
+Purpose
+Patient and site recruitment support.
+Features
+Eligibility criteria matching logic 
+Patient profile vs protocol criteria matching 
+Site feasibility questionnaire review 
+Recruitment barrier identification 
+Recruitment risk scoring 
+Patient journey content generation 
+Follow-up reminder workflow 
+Output
+Patient eligibility match summary 
+Site feasibility summary 
+Recruitment risk report 
+Module 9: iClinicalAi PREDICT
+Purpose
+Trial risk and outcome prediction support.
+Features
+Recruitment delay risk indicator 
+Site performance risk score 
+Patient dropout risk indicator 
+Protocol complexity score 
+Timeline risk estimation 
+Enrollment forecast dashboard 
+Study completion risk indicator 
+Output
+Trial risk dashboard 
+Enrollment forecast 
+Site performance risk summary 
+3. Technical Scope
+Application Type
+Web-based application 
+Responsive design 
+Admin and user dashboards 
+Cloud-ready deployment 
+4. AI Functional Requirements
+The platform should support:
+Document upload and parsing 
+AI summarization 
+Clinical data extraction 
+Prompt-based content generation 
+Comparison of documents/trials 
+Report generation 
+Clinical research chatbot 
+Reusable prompt templates 
+Audit trail for generated outputs 
+
+5. Non-Functional Requirements
+Secure login 
+Data confidentiality 
+Role-based access 
+User activity log 
+Backup system 
+Scalable architecture 
+Clean UI/UX 
+Export to PDF/Word/Excel 
+Basic audit trail 
+Error handling 
+Admin control panel 
+
+6. Developer Deliverables
+The developer should deliver:
+Functional MVP platform 
+Source code 
+Database structure 
+AI prompt library 
+Admin dashboard 
+User dashboard 
+Document upload feature 
+AI assistant interface 
+Module-wise workflows 
+Testing report 
+Deployment support 
+Technical documentation 
+User guide 
+Demo-ready version 
+7. Development Phases
+Phase 1: Requirement Finalization
+Review business concept 
+Finalize MVP features 
+Prepare workflow diagrams 
+Finalize user roles 
+Finalize technical architecture 
+Phase 2: UI/UX and Architecture
+Design screens 
+Prepare dashboard layout 
+Create module navigation 
+Finalize database design 
+Phase 3: Core Platform Development
+Login system 
+Admin dashboard 
+User dashboard 
+AI assistant 
+Document upload 
+Report generation 
+Phase 4: Module Development
+Priority modules:
+FIND 
+DESIGN 
+MANAGE 
+SAFETY 
+ANALYZE 
+Later modules:
+6. RECRUIT
+7. PREDICT

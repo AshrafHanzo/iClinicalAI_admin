@@ -1,0 +1,184 @@
+iClinicalAI SAFETY
+An Objective
+An AI-assisted Pharmacovigilance, Drug Safety, and Medical Review Support System designed to help Pharmacovigilance Professionals, Drug Safety Associates, Medical Reviewers, Medical Monitors, CROs, Sponsors, and Clinical Research Organizations streamline safety case review, narrative preparation, safety analysis, and aggregate reporting activities.
+Important: This module is NOT intended to replace qualified Pharmacovigilance professionals, Medical Reviewers, or Regulatory Safety Experts. Instead, it serves as an intelligent safety assistant that supports case review, narrative drafting, safety signal review, aggregate safety analysis, and medical review activities while requiring appropriate expert oversight.
+
+Input
+Safety Documents
+Mandatory
+CIOMS Reports
+SAE Forms
+Adverse Event Listings
+Safety Database Outputs
+Medical Review Guidelines
+Recommended
+Risk Management Plan (RMP)
+Development Safety Update Report (DSUR)
+Periodic Safety Update Report (PSUR/PBRER)
+Investigator Brochure (IB)
+Protocol
+
+Safety Data
+Individual Case Data
+Adverse Event Dataset
+Serious Adverse Event Dataset
+Concomitant Medication Dataset
+Medical History Dataset
+Laboratory Data
+Narrative Source Information
+Supported Formats
+PDF
+Excel (.xlsx)
+CSV (.csv)
+Word (.docx)
+
+Coding Information
+MedDRA Coding Outputs
+WHO Drug Coding Outputs
+Safety Coding Listings
+
+Workflow / Actions
+Step 1: Safety Case Review
+AI reviews:
+Patient Information
+Event Information
+Medical History
+Concomitant Medications
+Laboratory Findings
+Outcome Information
+Output
+Safety Case Review Summary
+
+Step 2: SAE Narrative Draft Generation
+AI generates draft narratives using:
+SAE Forms
+CIOMS Information
+Case Data
+Medical History
+Concomitant Medications
+Example Sections
+Patient Information
+Event Description
+Treatment Information
+Outcome
+Reporter Assessment
+Output
+SAE Narrative Draft
+
+Step 3: Safety Case Summary Generation
+AI prepares concise summaries of:
+Adverse Events
+Serious Adverse Events
+Suspected Adverse Reactions
+Safety Outcomes
+Output
+Safety Case Summary
+
+Step 4: Seriousness & Causality Assessment Checklist
+AI assists reviewers by generating checklists for:
+Seriousness Criteria
+Death
+Life Threatening Event
+Hospitalization
+Disability
+Congenital Anomaly
+Other Medically Important Condition
+Causality Assessment
+Related
+Possibly Related
+Unlikely Related
+Not Related
+Output
+Seriousness & Causality Review Checklist
+
+Step 5: MedDRA Coding Review Support
+AI reviews:
+Verbatim Terms
+Preferred Terms
+System Organ Class (SOC)
+Coding Consistency
+Output
+MedDRA Coding Review Notes
+
+Step 6: Aggregate Safety Summary
+AI analyzes:
+Total Adverse Events
+Serious Adverse Events
+Event Frequencies
+System Organ Class Distribution
+Safety Trends
+Output
+Aggregate Safety Summary Report
+
+Step 7: Safety Trend Analysis
+AI identifies:
+Frequently Reported Events
+Emerging Safety Patterns
+Event Trends
+Site-Level Safety Trends
+Output
+Safety Trend Dashboard
+
+Step 8: Medical Review Note Generation
+AI assists Medical Reviewers by generating:
+Medical Assessment Notes
+Safety Review Comments
+Clinical Interpretation Notes
+Follow-up Recommendations
+Output
+Medical Review Note
+
+Step 9: Signal Detection & Review Support
+AI identifies:
+Potential Safety Signals
+Event Clusters
+Unexpected Event Patterns
+Areas Requiring Medical Review
+Output
+Signal Review Summary
+
+Deliverables / Output
+Individual Case Safety Outputs
+Safety Case Review Summary
+SAE Narrative Draft
+Safety Case Summary
+Seriousness & Causality Checklist
+Coding Review Outputs
+MedDRA Coding Review Notes
+Coding Consistency Assessment
+Aggregate Safety Outputs
+Aggregate Safety Summary
+Safety Trend Dashboard
+Signal Review Summary
+Medical Review Outputs
+Medical Review Note
+Safety Assessment Summary
+Follow-up Recommendations
+Export Options
+PDF Export
+Word Export
+Expected MVP Outputs
+SAE Narrative Draft
+Safety Case Summary
+Seriousness & Causality Checklist
+MedDRA Coding Review Notes
+Aggregate Safety Summary
+Medical Review Note
+Signal Review Summary
+
+Target Users
+Industry
+Pharmacovigilance Associates
+Drug Safety Associates
+Medical Reviewers
+Medical Monitors
+Safety Physicians
+CROs
+Sponsors
+Regulatory Affairs Teams
+Academia
+Pharmacovigilance Students
+Clinical Research Students
+Pharmacy Students
+Pharm.D Students
+Drug Safety Researchers

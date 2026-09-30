@@ -1,0 +1,245 @@
+iClinicalAI MANAGE
+
+Objective
+
+An AI-assisted Clinical Data Management Support System designed to improve data review efficiency, support edit check development, assist with query management, and provide intelligent data review observations.
+
+Important
+
+This module is NOT intended to replace EDC systems, Clinical Data Management platforms, or Medical Coding tools.
+
+Instead, it acts as an AI assistant for Clinical Data Managers, Data Reviewers, and Study Teams.
+
+Input
+
+Users can upload:
+
+Study Documents
+
+CRF / eCRF Specifications
+
+Data Management Plan (DMP)
+
+Edit Check Specifications
+
+Data Review Guidelines
+
+Clinical Data
+
+Sample Study Data (.csv, .xlsx)
+
+Listing Outputs
+
+Query Reports
+
+Discrepancy Reports
+
+Coding Information
+
+Medical Coding Listings
+
+WHO Drug Coding Outputs
+
+Workflow / Action 
+
+Step 1: CRF Review Support
+
+AI reviews CRFs and identifies:
+
+Missing fields
+
+Inconsistent field definitions
+
+Duplicate data collection
+
+Protocol vs CRF alignment issues
+
+Example
+
+"Concomitant Medication Start Date is collected but End Date is not available."
+
+Step 2: Edit Check Suggestion
+
+Based on:
+
+Protocol
+
+CRF
+
+Data Collection Structure
+
+AI generates suggested edit checks.
+
+Example
+
+IF VISIT_DATE < INFORMED_CONSENT_DATE
+
+THEN Generate Query
+
+Step 3: Data Query Wording Assistance
+
+AI helps generate professional query text.
+
+Example
+
+Instead of:
+
+"Date is wrong."
+
+AI suggests:
+
+"Please verify the Visit Date as it appears earlier than the Informed Consent Date."
+
+Step 4: Data Cleaning Checklist
+
+Generate study-specific checklists.
+
+Categories
+
+Missing Data
+
+Date Review
+
+Laboratory Review
+
+AE Review
+
+Concomitant Medication Review
+
+Protocol Deviation Review
+
+Step 5: Medical Coding Review Notes
+
+AI reviews coding outputs and highlights:
+
+Potential uncoded terms
+
+Inconsistent coding
+
+Terms requiring review
+
+Example
+
+"Head Pain and Headache may require coding consistency review."
+
+Step 6: Query Trend Analysis
+
+Analyze:
+
+Open Queries
+
+Closed Queries
+
+Query Aging
+
+Site-wise Query Distribution
+
+Generate summary observations.
+
+Example
+
+"Site 105 contributes 25% of all open queries."
+
+Step 7: Data Review Summary
+
+AI generates a Data Review Report.
+
+Example Sections
+
+Missing Data Summary
+
+Query Summary
+
+Coding Review Summary
+
+Key Data Quality Findings
+
+Recommended Actions
+
+Step 8: Sample Data Review
+
+User uploads sample datasets.
+
+Supported Formats:
+
+CSV
+
+XLSX
+
+AI identifies:
+
+Missing Values
+
+Outliers
+
+Invalid Dates
+
+Duplicate Records
+
+Potential Data Quality Risks
+
+Example
+
+"12 records contain missing Visit Dates."
+
+Deliverables / Output
+
+CRF Review Report
+
+Suggested Edit Check Draft
+
+Query Text Suggestions
+
+Data Cleaning Checklist
+
+Medical Coding Review Notes
+
+Query Trend Summary
+
+Data Review Summary Report
+
+Dataset Observation Report
+
+MVP Development Recommendation
+
+Phase 1 (Must Have)
+
+CRF Review Support
+
+Edit Check Suggestions
+
+Query Wording Assistance
+
+Data Cleaning Checklist
+
+Sample Dataset Review
+
+Data Review Summary
+
+Phase 2 (we can add later)
+
+Query Trend Analytics
+
+Medical Coding Review
+
+Site-Level Quality Dashboard
+
+Phase 3  (we can add later)
+
+EDC Integration
+
+AI Data Review Assistant
+
+Risk-Based Data Cleaning Recommendations
+
+Expected MVP Outputs
+
+Edit Check Draft Document
+
+Query Suggestion Report
+
+Data Cleaning Checklist
+
+Data Quality Observation Report
+
+CDM Executive Review Summary

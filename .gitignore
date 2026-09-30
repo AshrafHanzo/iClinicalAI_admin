@@ -1,0 +1,29 @@
+# Secrets — shared separately, never commit
+.env
+.env.*
+!.env.example
+VPS_SERVER_CONFIG.txt
+server_commands.txt
+
+# Dependencies / builds
+node_modules/
+dist/
+.vite/
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Runtime data (uploaded protocols, local DB, generated JSON stores)
+backend/uploads/
+backend/*.db
+backend/documents_db.json
+backend/trials_db.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log

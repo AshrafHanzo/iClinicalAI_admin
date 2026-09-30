@@ -1,0 +1,141 @@
+iClinicalAI ANALYSE
+An Objective
+An AI-assisted Biostatistics, Statistical Programming, and Clinical Analytics Support System designed to help Biostatisticians, Statistical Programmers, Clinical Data Scientists, Medical Writers, Clinical Researchers, CROs, and Sponsors streamline statistical planning, analysis review, interpretation, and reporting activities.
+Important: This module is NOT intended to replace qualified Biostatisticians, Statistical Programmers, or validated statistical software. Instead, it acts as an intelligent analytics assistant that helps users review study data, generate analysis documentation, prepare reporting structures, interpret results, and accelerate statistical deliverables.
+Input
+Users can upload:
+Study Documents
+Sample Protocol 
+Sample SAP 
+Sample TLF Shell Specification 
+Sample CSR Template 
+Clinical Data
+Demographics Dataset 
+Efficacy Dataset 
+Safety Dataset 
+Laboratory Dataset 
+Statistical Outputs
+Summary Tables 
+Efficacy Output 
+Safety Output 
+Deliverables
+Sample SAP Outline 
+Sample TLF Shells 
+Sample CSR Result Section
+
+Workflow / Actions
+Step 1: Study Analysis Review
+AI reviews:
+Protocol
+Study Objectives
+Endpoints
+Study Design
+Analysis Requirements
+Output
+Study Analysis Summary
+
+Step 2: Endpoint Summary Generation
+AI identifies and summarizes:
+Primary Endpoints
+Secondary Endpoints
+Exploratory Endpoints
+Safety Endpoints
+Output
+Endpoint Summary Report
+
+Step 3: SAP Outline Generation
+AI generates a draft Statistical Analysis Plan (SAP) structure based on:
+Study Design
+Endpoints
+Analysis Populations
+Statistical Methodology
+Output
+SAP Outline Draft
+
+Step 4: TLF Shell Draft Generation
+AI generates draft shells for:
+Tables
+Demographics
+Baseline Characteristics
+Efficacy Summary
+Safety Summary
+Listings
+Adverse Events
+Protocol Deviations
+Concomitant Medications
+Figures
+Subject Disposition
+Endpoint Trends
+Output
+TLF Shell Draft Package
+
+Step 5: Dataset Review Checklist
+AI reviews analysis datasets and generates:
+Dataset Readiness Checklist
+Missing Variable Review
+Data Consistency Checks
+Analysis Readiness Observations
+Output
+Dataset Review Checklist
+
+Step 6: Analysis Summary & Descriptive Statistics
+AI summarizes:
+Mean
+Median
+Standard Deviation
+Minimum / Maximum
+Key Trends
+Output
+Analysis Summary Report
+
+Step 7: Clinical Result Interpretation Support
+AI assists in interpreting:
+Efficacy Results
+Safety Results
+Laboratory Results
+Clinical Outcomes
+Output
+Clinical Interpretation Summary
+
+Step 8: CSR Results Draft Support
+AI generates draft text for:
+Demographics Section
+Efficacy Results
+Safety Results
+Key Findings
+Output
+CSR Results Draft
+Deliverables / Output
+Statistical Planning
+SAP Outline Draft
+Endpoint Summary Report
+Statistical Programming Support
+TLF Shell Draft Package
+Dataset Review Checklist
+Clinical Analytics
+Analysis Summary Report
+Clinical Result Interpretation Summary
+Medical Writing Support
+CSR Results Draft
+Export Options
+PDF Export
+Word Export
+
+Target Users
+Industry
+Biostatisticians
+Statistical Programmers
+Clinical Data Scientists
+Medical Writers
+Clinical Data Managers
+Clinical Project Managers
+CROs
+Sponsors
+Academia
+Biostatistics Students
+SAS Programming Students
+Clinical Research Students
+Research Scholars
+Faculty Members
+Healthcare Analytics Students
+

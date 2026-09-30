@@ -1,0 +1,86 @@
+iClinicalAI DESIGN
+Objective
+An AI-assisted Protocol Review and Study Design Support System.
+Important:
+This module is NOT generating a full protocol from scratch. Instead, it reviews and analyzes existing protocols or synopses and provides intelligence.
+
+Input
+User uploads:
+Protocol (.pdf/.docx) – Full / Detailed document 
+Sample Protocol all the phase and therapeutic
+Protocol Synopsis – Partial (Summary)
+Sample Protocol Synopsis all the phase and therapeutic
+Study Concept Sheet 
+Sample Study Concept Sheet
+
+
+Workflow / Action 
+Step 1: Protocol Parsing
+AI extracts:
+Study Title 
+Objectives 
+Endpoints 
+Inclusion Criteria 
+Exclusion Criteria 
+Study Design 
+Treatment Arms 
+Visit Schedule 
+Convert into structured metadata.
+
+
+
+Step 2: Protocol Summary Generation
+Generate:
+Executive Summary
+Indication 
+Study Objective 
+Population 
+Design 
+Endpoints 
+
+Step 3: Eligibility Criteria Review
+AI reviews:
+Inclusion Criteria
+Too restrictive? 
+Missing criteria? 
+Exclusion Criteria
+Excessive exclusions? 
+Operational challenges? 
+Example:
+"Patients aged >75 years are excluded. Consider assessing whether this restriction may affect recruitment feasibility."
+
+Step 4: Gap Analysis
+Identify missing sections:
+Examples:
+Missing Safety Endpoint 
+Missing Statistical Considerations 
+Missing Risk Mitigation Plan 
+Missing Recruitment Strategy 
+
+Step 5: Feasibility Checklist
+Generate checklist:
+
+Step 6: Study Design Recommendations
+Suggest:
+Adaptive Design 
+Randomization Strategy 
+Endpoint Improvements 
+Eligibility Optimization 
+
+Deliverables / Output
+Protocol Summary 
+Feasibility Checklist 
+Gap Analysis Report 
+Study Design Recommendation Note 
+Similar Trial Benchmark Report
+
+Category
+Status
+Recruitment
+Medium Risk
+Site Availability
+Good
+Eligibility Complexity
+High
+Timeline Feasibility
+Moderate
