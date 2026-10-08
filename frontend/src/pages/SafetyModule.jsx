@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { DashboardHeader, Panel, FeatureCards, StatGrid, DocumentTable, StepCoverage, progressCounts } from '../components/ModuleDashboard';
+import { getModule } from '../moduleNav';
 import { 
   listDocuments, 
   runSafetyAnalysis, 
@@ -265,10 +267,12 @@ function renderMarkdown(text) {
   return processedLines.join('\n');
 }
 
-export default function SafetyModule() {
+export default function SafetyModule({ view = 'dashboard', onNavigate = () => {} }) {
   const [allDocs, setAllDocs] = useState([]);
   const [doc, setDoc] = useState(null);
-  const [activeStep, setActiveStep] = useState(1); // steps 1-9, plus 10 (Naranjo), 11 (Chat)
+  // steps 1-9, plus 10 (Naranjo), 11 (Chat); the module sidebar and the step list both drive it.
+  const activeStep = view === 'dashboard' ? 1 : Number(view);
+  const setActiveStep = (step) => onNavigate(String(step));
   const [error, setError] = useState('');
   const [showUploadSection, setShowUploadSection] = useState(false);
   
@@ -472,6 +476,98 @@ export default function SafetyModule() {
 
   const completedCount = Object.values(stepResults).filter(v => v).length;
 
+  if (view === 'dashboard') {
+    // Saved-result key for each safety step (same keys the backend writes).
+    const SAFETY_KEYS = {
+      1: 'safety_case_review', 2: 'sae_narrative', 3: 'safety_case_summary',
+      4: 'causality_checklist', 5: 'meddra_coding', 6: 'aggregate_safety',
+      7: 'safety_trend', 8: 'medical_review', 9: 'signal_detection',
+    };
+    const steps = getModule('safety').features
+      .filter(f => SAFETY_KEYS[f.id])
+      .map(f => ({ ...f, key: SAFETY_KEYS[f.id] }));
+    const stepKeys = steps.map(s => s.key);
+    // The active document carries the latest step results; the list copy may be older.
+    const docs = allDocs.map(d => (doc && d.id === doc.id ? doc : d));
+    const counts = progressCounts(docs, stepKeys);
+
+    return (
+      <div className="dash">
+        <DashboardHeader title="Welcome to Safety" subtitle="AI-assisted pharmacovigilance safety summaries, MedDRA coding reviews, and causality audits.">
+          <button className="btn btn-primary" onClick={() => setShowUploadSection(!showUploadSection)}>
+            {showUploadSection ? '✖️ Close Uploader' : '📤 Upload Safety File'}
+          </button>
+        </DashboardHeader>
+
+        {error && (
+          <div className="error-banner">
+            <span>⚠️</span>
+            <span style={{ flex: 1 }}>{error}</span>
+            <button className="btn btn-sm btn-secondary" onClick={() => setError('')}>Dismiss</button>
+          </div>
+        )}
+
+        {(!allDocs.length || showUploadSection) && (
+          <Panel title="📤 Upload Safety Document">
+            <DocumentUpload onUpload={handleUpload} isUploading={isUploading} />
+          </Panel>
+        )}
+
+        <StatGrid items={[
+          { label: 'Safety Documents', value: docs.length, sub: 'Uploaded files', tone: 2 },
+          { label: 'Reviewed', value: counts.completed + counts.in_progress, sub: 'With safety output', tone: 3 },
+          { label: 'Fully Reviewed', value: counts.completed, sub: 'All 9 steps complete', tone: 4 },
+          { label: 'Safety Outputs', value: counts.stepsDone, sub: 'Across all documents', tone: 5 },
+          { label: 'Active Document', value: `${completedCount}/9`, sub: doc ? 'Steps completed' : 'None selected', tone: 6 },
+        ]} />
+
+        <Panel title="Safety Documents" flush>
+          <DocumentTable
+            docs={docs}
+            stepKeys={stepKeys}
+            activeIds={doc ? [doc.id] : []}
+            onOpen={(d) => handleSelectDocument(d.id)}
+            openLabel="Set Active"
+            emptyText="No safety documents uploaded yet."
+          />
+        </Panel>
+
+        <div className="dash-grid">
+          <Panel title="Safety Step Coverage">
+            <StepCoverage steps={steps} docs={docs} onOpen={onNavigate} />
+          </Panel>
+
+          <Panel title="Causality & Q&A">
+            {naranjoResult ? (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Last Naranjo assessment (this session)</div>
+                <div style={{ fontSize: 22, fontWeight: 750, color: 'var(--text-primary)', marginTop: 2 }}>
+                  {naranjoResult.color} {naranjoResult.causality} • Score {naranjoResult.score}
+                </div>
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14 }}>
+                No causality assessment run in this session.
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('10')}>🧪 Causality Calculator</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('11')} disabled={!doc}>💬 Safety Chatbot</button>
+            </div>
+          </Panel>
+        </div>
+
+        <Panel title="Features">
+          <FeatureCards
+            features={getModule('safety').features.map(f => ({ ...f, desc: STEPS.find(s => String(s.id) === f.id)?.desc }))}
+            doneIds={Object.keys(stepResults).filter(k => stepResults[k])}
+            onOpen={onNavigate}
+          />
+        </Panel>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -598,7 +694,7 @@ export default function SafetyModule() {
           <div className="stat-card">
             <div className="stat-label">Total Words</div>
             <div className="stat-value" style={{ fontSize: 20, fontWeight: 800, marginTop: 4 }}>
-              {doc.stats?.word_count || 'Pending'}
+              {doc.word_count?.toLocaleString() ?? 'Pending'}
             </div>
             <div className="stat-desc">extracted from document</div>
           </div>

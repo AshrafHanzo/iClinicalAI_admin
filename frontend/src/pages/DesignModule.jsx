@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import DocumentUpload from '../components/DocumentUpload';
 import AnalysisResults from '../components/AnalysisResults';
-import { uploadDocument, runAnalysis, chatWithDocument, listDocuments, getDocument, deleteDocument } from '../services/api';
+import { uploadDocument, runAnalysis, chatWithDocument, listDocuments, getDocument, deleteDocument, getOrGenerateDashboard } from '../services/api';
+import { DashboardHeader, Panel, FeatureCards, StatGrid, DocumentTable, StepCoverage, progressCounts } from '../components/ModuleDashboard';
+import { getModule } from '../moduleNav';
 
 // Custom-designed premium Protocol Selector dropdown
 function ProtocolSelector({ allDocs, currentDoc, onSelect, onDelete }) {
@@ -328,7 +330,29 @@ function ProtocolSelector({ allDocs, currentDoc, onSelect, onDelete }) {
   );
 }
 
-export default function DesignModule() {
+// Saved-result key for each DESIGN step.
+const DESIGN_STEP_KEYS = {
+  extract: 'extraction',
+  summary: 'summary',
+  eligibility: 'eligibility_review',
+  gaps: 'gap_analysis',
+  feasibility: 'feasibility',
+  recommendations: 'design_recommendations',
+};
+const DESIGN_KEYS = Object.values(DESIGN_STEP_KEYS);
+
+const GLANCE_FIELDS = [
+  ['Study Phase', 'phase'],
+  ['Therapeutic Area', 'therapeutic_area'],
+  ['Study Design', 'study_design'],
+  ['Enrollment Target', 'enrollment_target'],
+  ['Number of Sites', 'sites_count'],
+  ['Countries', 'countries'],
+  ['Study Duration', 'duration'],
+];
+
+export default function DesignModule({ view = 'dashboard', onNavigate = () => {} }) {
+  const [isGeneratingOverview, setIsGeneratingOverview] = useState(false);
   const [doc, setDoc] = useState(null);
   const [allDocs, setAllDocs] = useState([]);
   const [showUploadSection, setShowUploadSection] = useState(false);
@@ -501,6 +525,111 @@ export default function DesignModule() {
 
   const completedAnalyses = Object.values(results).filter(v => v).length;
 
+  const handleGenerateOverview = async () => {
+    if (!doc) return;
+    setIsGeneratingOverview(true);
+    setError('');
+    try {
+      const data = await getOrGenerateDashboard(doc.id);
+      setDoc(prev => ({ ...prev, stats: { ...prev.stats, executive_dashboard: data.executive_dashboard } }));
+    } catch (err) {
+      setError(err.message || 'Failed to generate study dashboard');
+    } finally {
+      setIsGeneratingOverview(false);
+    }
+  };
+
+  if (view === 'dashboard') {
+    const overview = doc?.stats?.executive_dashboard;
+    const counts = progressCounts(allDocs, DESIGN_KEYS);
+    const designSteps = getModule('design').features
+      .filter(f => DESIGN_STEP_KEYS[f.id])
+      .map(f => ({ ...f, key: DESIGN_STEP_KEYS[f.id] }));
+    return (
+      <div className="dash">
+        <DashboardHeader title="Welcome to Design" subtitle="AI-powered protocol review and study design intelligence">
+          <button className="btn btn-primary" onClick={() => setShowUploadSection(!showUploadSection)}>
+            {showUploadSection ? '✕ Close Upload' : '📤 Upload New Protocol'}
+          </button>
+        </DashboardHeader>
+
+        {error && (
+          <div className="error-banner">
+            <span>❌</span>
+            <span style={{ flex: 1 }}>{error}</span>
+            <button className="btn btn-sm btn-secondary" onClick={() => setError('')}>Dismiss</button>
+          </div>
+        )}
+
+        {(!allDocs.length || showUploadSection) && (
+          <Panel title="📤 Upload Clinical Document">
+            <DocumentUpload onUpload={handleUpload} isUploading={isUploading} />
+          </Panel>
+        )}
+
+        <StatGrid items={[
+          { label: 'Total Protocols', value: allDocs.length, sub: 'Uploaded documents', tone: 2 },
+          { label: 'Fully Analyzed', value: counts.completed, sub: 'All 6 steps complete', tone: 3 },
+          { label: 'In Progress', value: counts.in_progress, sub: 'Some steps complete', tone: 4 },
+          { label: 'Not Started', value: counts.not_started, sub: 'No analysis yet', tone: 5 },
+          { label: 'Analyses Run', value: counts.stepsDone, sub: 'Across all protocols', tone: 6 },
+        ]} />
+
+        <Panel title="Protocols" flush>
+          <DocumentTable
+            docs={allDocs}
+            stepKeys={DESIGN_KEYS}
+            activeIds={doc ? [doc.id] : []}
+            onOpen={(d) => handleSelectDocument(d.id)}
+            openLabel="Set Active"
+            emptyText="No protocols uploaded yet."
+          />
+        </Panel>
+
+        <div className="dash-grid">
+          <Panel title="Analysis Coverage">
+            <StepCoverage steps={designSteps} docs={allDocs} onOpen={onNavigate} />
+          </Panel>
+
+          <Panel title="Active Protocol" action={doc ? { label: 'View Synopsis', onClick: () => onNavigate('summary') } : null}>
+            {!doc ? (
+              <div className="dash-empty">Upload or select a protocol to see its details.</div>
+            ) : (
+              <>
+                <div style={{ fontWeight: 650, color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>{doc.filename}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 14px' }}>
+                  {doc.word_count?.toLocaleString()} words • {completedAnalyses}/6 analyses completed
+                </div>
+                {overview ? (
+                  <dl className="glance-list">
+                    {GLANCE_FIELDS.map(([label, key]) => (
+                      <div key={key} style={{ display: 'contents' }}>
+                        <dt>{label}</dt>
+                        <dd>{overview[key] || '—'}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <button className="btn btn-secondary btn-sm" onClick={handleGenerateOverview} disabled={isGeneratingOverview}>
+                    {isGeneratingOverview ? 'Analyzing Protocol Metrics...' : '⚡ Generate Dashboard & Health Scores'}
+                  </button>
+                )}
+              </>
+            )}
+          </Panel>
+        </div>
+
+        <Panel title="Features">
+          <FeatureCards
+            features={getModule('design').features}
+            doneIds={Object.keys(results).filter(k => results[k])}
+            onOpen={onNavigate}
+          />
+        </Panel>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="page-header">
@@ -608,6 +737,8 @@ export default function DesignModule() {
           isChatting={isChatting}
           docStats={doc?.stats}
           onUpdateStats={(newStats) => setDoc(prev => ({ ...prev, stats: newStats }))}
+          activeTab={view}
+          onTabChange={onNavigate}
         />
       </div>
     </div>

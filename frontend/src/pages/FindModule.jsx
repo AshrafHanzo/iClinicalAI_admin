@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { searchTrials, runTrialAnalysis, chatWithTrials, deleteTrial, listTrials } from '../services/api';
+import { DashboardHeader, Panel, FeatureCards, StatGrid, Breakdown, countBy } from '../components/ModuleDashboard';
+import { getModule } from '../moduleNav';
 
 // Helper to format file sizes
 const formatSize = (bytes) => {
@@ -83,7 +85,7 @@ function renderMarkdown(text) {
     .replace(/\n\n/g, '<br/>');
 }
 
-export default function FindModule() {
+export default function FindModule({ view = 'dashboard', onNavigate = () => {} }) {
   const [searchMode, setSearchMode] = useState('clinical'); // 'clinical' or 'academic'
   const [searchLive, setSearchLive] = useState(true);
   
@@ -113,9 +115,16 @@ export default function FindModule() {
   });
 
   const [trials, setTrials] = useState([]);
+  // Dashboard search/filters over the saved trial library
+  const [libQuery, setLibQuery] = useState('');
+  const [libPhase, setLibPhase] = useState('all');
+  const [libStatus, setLibStatus] = useState('all');
+  const [libCountry, setLibCountry] = useState('all');
   const [selectedTrialIds, setSelectedTrialIds] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState('results');
+  // The module sidebar and the step tabs both drive the active step.
+  const activeTab = view === 'dashboard' ? 'results' : view;
+  const setActiveTab = onNavigate;
   const [analysisResults, setAnalysisResults] = useState({});
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [loadingTab, setLoadingTab] = useState(null);
@@ -277,6 +286,109 @@ export default function FindModule() {
     { id: 'dissertation', label: 'Step 9: Dissertation', type: 'dissertation' },
     { id: 'chat', label: '💬 Ask AI' }
   ];
+
+  if (view === 'dashboard') {
+    const q = libQuery.toLowerCase();
+    const phases = countBy(trials, t => t.phase);
+    const statuses = countBy(trials, t => t.status);
+    const countries = countBy(trials, t => t.countries);
+    const sponsors = countBy(trials, t => t.sponsor);
+    const filtered = trials
+      .filter(t => !q || [t.nct_number, t.title, t.sponsor, t.indication, t.drug_name]
+        .some(v => String(v || '').toLowerCase().includes(q)))
+      .filter(t => libPhase === 'all' || t.phase === libPhase)
+      .filter(t => libStatus === 'all' || t.status === libStatus)
+      .filter(t => libCountry === 'all' || (t.countries || []).includes(libCountry));
+    const statusClass = (s) => s === 'Recruiting' ? 'success' : s === 'Completed' ? 'info' : 'warning';
+
+    return (
+      <div className="dash">
+        <DashboardHeader title="Welcome to Find" subtitle="AI-assisted Clinical Trial Search, Registry Intelligence & Research Discovery">
+          <button className="btn btn-primary" onClick={() => onNavigate('results')}>🔍 Search Registry & AI</button>
+        </DashboardHeader>
+
+        <StatGrid items={[
+          { label: 'Trials in Library', value: trials.length, sub: 'Saved from registry searches', tone: 2 },
+          { label: 'Recruiting', value: trials.filter(t => t.status === 'Recruiting').length, sub: 'Currently enrolling', tone: 3 },
+          { label: 'Completed', value: trials.filter(t => t.status === 'Completed').length, sub: 'Finished trials', tone: 4 },
+          { label: 'Countries', value: countries.length, sub: 'With trial sites', tone: 5 },
+          { label: 'Sponsors', value: sponsors.length, sub: 'Lead sponsors', tone: 6 },
+        ]} />
+
+        <Panel title="Trial Library" flush>
+          <div className="dash-toolbar">
+            <input
+              className="dash-search"
+              type="search"
+              placeholder="Search by NCT number, title, sponsor, condition or drug..."
+              value={libQuery}
+              onChange={(e) => setLibQuery(e.target.value)}
+            />
+            <select className="dash-filter" value={libPhase} onChange={(e) => setLibPhase(e.target.value)} aria-label="Filter by phase">
+              <option value="all">All phases</option>
+              {phases.map(([p]) => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select className="dash-filter" value={libStatus} onChange={(e) => setLibStatus(e.target.value)} aria-label="Filter by status">
+              <option value="all">All statuses</option>
+              {statuses.map(([s]) => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <select className="dash-filter" value={libCountry} onChange={(e) => setLibCountry(e.target.value)} aria-label="Filter by country">
+              <option value="all">All countries</option>
+              {countries.map(([c]) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <span className="dash-count">Showing {filtered.length} of {trials.length} • {selectedTrialIds.length} selected</span>
+          </div>
+
+          {trials.length === 0 ? (
+            <div className="dash-empty">No trials yet. Use Search Registry & AI to pull trials from the registry.</div>
+          ) : filtered.length === 0 ? (
+            <div className="dash-empty">No trials match your search or filters.</div>
+          ) : (
+            <div className="table-scroll" style={{ maxHeight: 460, overflowY: 'auto' }}>
+              <table className="dash-table">
+                <thead>
+                  <tr><th></th><th>NCT Number</th><th>Title</th><th>Phase</th><th>Status</th><th>Sponsor</th><th>Countries</th></tr>
+                </thead>
+                <tbody>
+                  {filtered.map(t => {
+                    const selected = selectedTrialIds.includes(t.id);
+                    return (
+                      <tr key={t.id} className={selected ? 'selected' : ''} onClick={() => handleSelectTrial(t.id)} style={{ cursor: 'pointer' }}>
+                        <td><input type="checkbox" checked={selected} readOnly /></td>
+                        <td className="nowrap" style={{ fontWeight: 700, color: 'var(--accent)' }}>{t.nct_number}</td>
+                        <td className="row-title">{t.title}</td>
+                        <td className="nowrap">{t.phase}</td>
+                        <td className="nowrap"><span className={`status-badge ${statusClass(t.status)}`}>{t.status}</span></td>
+                        <td>{t.sponsor}</td>
+                        <td>{(t.countries || []).filter(c => c !== 'N/A').slice(0, 3).join(', ')}{(t.countries || []).length > 3 ? ` +${t.countries.length - 3}` : ''}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Panel>
+
+        <div className="dash-grid">
+          <Panel title="Trials by Status">
+            <Breakdown entries={statuses} total={trials.length} />
+          </Panel>
+          <Panel title="Trials by Phase">
+            <Breakdown entries={phases} total={trials.length} />
+          </Panel>
+        </div>
+
+        <Panel title="Features">
+          <FeatureCards
+            features={getModule('find').features}
+            doneIds={Object.keys(analysisResults).filter(k => analysisResults[k])}
+            onOpen={onNavigate}
+          />
+        </Panel>
+      </div>
+    );
+  }
 
   return (
     <div>

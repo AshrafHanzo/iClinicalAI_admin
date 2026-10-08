@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { DashboardHeader, Panel, FeatureCards, StatGrid, DocumentTable, StepCoverage, Breakdown, progressCounts } from '../components/ModuleDashboard';
+import { getModule } from '../moduleNav';
 import { 
   listDocuments, 
   runManageAnalysis, 
@@ -229,10 +231,12 @@ const STEPS = [
   { id: 'review_summary', label: 'Step 7: Review Summary', icon: '📝', desc: 'Produce executive CDM readiness reports' },
 ];
 
-export default function ManageModule() {
+export default function ManageModule({ view = 'dashboard', onNavigate = () => {} }) {
   const [documents, setDocuments] = useState([]);
   const [selectedDocId, setSelectedDocId] = useState('');
-  const [activeTab, setActiveTab] = useState('crf_review');
+  // The module sidebar and the step list both drive the active step.
+  const activeTab = view === 'dashboard' ? 'crf_review' : view;
+  const setActiveTab = onNavigate;
   const [loadingTab, setLoadingTab] = useState(null);
   const [tabResults, setTabResults] = useState({});
   
@@ -473,7 +477,76 @@ export default function ManageModule() {
     return html;
   };
 
-  const completedCount = Object.keys(tabResults).length;
+  const completedCount = Object.values(tabResults).filter(Boolean).length;
+
+  if (view === 'dashboard') {
+    const steps = getModule('manage').features.map(f => ({ ...f, key: f.id, desc: STEPS.find(s => s.id === f.id)?.desc }));
+    const stepKeys = steps.map(s => s.key);
+    const counts = progressCounts(documents, stepKeys);
+    const summary = auditResult?.summary;
+    return (
+      <div className="dash">
+        <DashboardHeader title="Welcome to Manage" subtitle="AI-assisted Clinical Data Management, CRF Audit & Dynamic Data Quality Checks">
+          <button className="btn btn-primary" onClick={() => onNavigate('dataset_review')}>📊 Dataset Review</button>
+        </DashboardHeader>
+
+        <StatGrid items={[
+          { label: 'Protocol Documents', value: documents.length, sub: 'Available as study context', tone: 2 },
+          { label: 'With CDM Output', value: counts.completed + counts.in_progress, sub: `${counts.completed} fully reviewed`, tone: 3 },
+          { label: 'CDM Steps Generated', value: counts.stepsDone, sub: 'Across all protocols', tone: 4 },
+          { label: 'Active Protocol', value: `${completedCount}/7`, sub: activeDoc ? 'Steps generated' : 'None selected', tone: 6 },
+          { label: 'Data Integrity Flags', value: summary ? summary.total_issues : '—', sub: summary ? `${summary.total_rows} rows audited` : 'No dataset loaded', tone: 1 },
+        ]} />
+
+        <Panel title="Protocols" flush>
+          <DocumentTable
+            docs={documents}
+            stepKeys={stepKeys}
+            activeIds={selectedDocId ? [selectedDocId] : []}
+            onOpen={(d) => setSelectedDocId(d.id)}
+            openLabel="Set Active"
+            emptyText="No documents uploaded yet."
+          />
+        </Panel>
+
+        <div className="dash-grid">
+          <Panel title="CDM Step Coverage">
+            <StepCoverage steps={steps} docs={documents} onOpen={onNavigate} />
+          </Panel>
+
+          <Panel title="Clinical Dataset" action={{ label: 'Open Dataset Review', onClick: () => onNavigate('dataset_review') }}>
+            {!summary ? (
+              <div className="dash-empty">No dataset loaded. Upload a CSV or load the demo dataset in Step 6: Dataset Review.</div>
+            ) : (
+              <>
+                <div style={{ fontWeight: 650, color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>{activeDatasetName}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 12px' }}>
+                  {summary.total_rows} rows • {summary.total_cols} columns • {summary.total_issues} issues
+                </div>
+                <Breakdown
+                  total={summary.total_issues}
+                  entries={[
+                    ['Missing values', summary.missing_count],
+                    ['Date logic / format', summary.date_logic_count],
+                    ['Outliers', summary.outlier_count],
+                    ['Duplicate records', summary.duplicate_count],
+                  ]}
+                />
+              </>
+            )}
+          </Panel>
+        </div>
+
+        <Panel title="Features">
+          <FeatureCards
+            features={steps}
+            doneIds={STEPS.filter(s => tabResults[s.id]).map(s => s.id)}
+            onOpen={onNavigate}
+          />
+        </Panel>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '100%', overflowX: 'hidden' }}>
@@ -665,6 +738,45 @@ export default function ManageModule() {
             </div>
           ) : (
             <div>
+              {/* Programmatic audit table when no AI report exists yet */}
+              {activeTab === 'dataset_review' && auditResult && !tabResults[activeTab] && auditResult.issues.length > 0 && (
+                <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: 20 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left' }}>
+                    <thead style={{ background: 'var(--bg-hover)', position: 'sticky', top: 0, zIndex: 5 }}>
+                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                        <th style={{ padding: '6px 10px', color: 'var(--text-primary)' }}>Row</th>
+                        <th style={{ padding: '6px 10px', color: 'var(--text-primary)' }}>Field</th>
+                        <th style={{ padding: '6px 10px', color: 'var(--text-primary)' }}>Discrepancy</th>
+                        <th style={{ padding: '6px 10px', color: 'var(--text-primary)' }}>Detail</th>
+                        <th style={{ padding: '6px 10px', color: 'var(--text-primary)' }}>Severity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {auditResult.issues.map((issue, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                          <td style={{ padding: '6px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>{issue.row}</td>
+                          <td style={{ padding: '6px 10px', color: 'var(--text-secondary)' }}>{issue.field}</td>
+                          <td style={{ padding: '6px 10px', color: 'var(--text-primary)', fontWeight: 500 }}>{issue.type}</td>
+                          <td style={{ padding: '6px 10px', color: 'var(--text-secondary)' }}>{issue.description}</td>
+                          <td style={{ padding: '6px 10px' }}>
+                            <span style={{
+                              fontSize: '9px',
+                              fontWeight: '700',
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                              background: issue.severity === 'High' ? '#fee2e2' : issue.severity === 'Medium' ? '#fffbeb' : '#ecfdf5',
+                              color: issue.severity === 'High' ? '#ef4444' : issue.severity === 'Medium' ? '#f59e0b' : '#10b981'
+                            }}>
+                              {issue.severity}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
               {/* Output Content */}
               {tabResults[activeTab] ? (
                 <div>
@@ -681,6 +793,18 @@ export default function ManageModule() {
                       </p>
                     </div>
                   </div>
+
+                  {activeTab === 'dataset_review' && !auditResult && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                      <label className="btn btn-secondary btn-sm" style={{ display: 'inline-flex', cursor: 'pointer' }}>
+                        Browse Local File
+                        <input type="file" accept=".csv" onChange={handleFileUpload} style={{ display: 'none' }} />
+                      </label>
+                      <button onClick={handleLoadDemoDataset} className="btn btn-secondary btn-sm" disabled={isAuditing}>
+                        {isAuditing ? 'Analyzing...' : '⚡ Load Demo Dataset'}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Interactive Query Wording Box in Step 3 */}
                   {activeTab === 'query_wording' && (

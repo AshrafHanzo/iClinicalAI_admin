@@ -8,6 +8,8 @@ import {
   chatWithDocument 
 } from '../services/api';
 import ChatInterface from '../components/ChatInterface';
+import { DashboardHeader, Panel, FeatureCards, StatGrid, DocumentTable, StepCoverage, progressCounts } from '../components/ModuleDashboard';
+import { getModule } from '../moduleNav';
 
 // Premium Protocol Selector Dropdown with animations and glassmorphism
 function ProtocolSelector({ allDocs, currentDoc, onSelect, onDelete }) {
@@ -272,8 +274,10 @@ const STEPS = [
   { id: 'chat', label: '💬 Biostatistician Chat', icon: '🤖', desc: 'Chat directly with your study protocol & data' }
 ];
 
-export default function AnalyseModule() {
-  const [activeStep, setActiveStep] = useState('study_review');
+export default function AnalyseModule({ view = 'dashboard', onNavigate = () => {} }) {
+  // The module sidebar and the workflow list both drive the active step.
+  const activeStep = view === 'dashboard' ? 'study_review' : view;
+  const setActiveStep = onNavigate;
   const [allDocs, setAllDocs] = useState([]);
   const [currentDoc, setCurrentDoc] = useState(null);
   
@@ -412,11 +416,14 @@ export default function AnalyseModule() {
       if (vals.length > 0 && vals.length > data.length * 0.4) {
         const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
         const sorted = [...vals].sort((a, b) => a - b);
-        const median = sorted[Math.floor(sorted.length / 2)];
+        const mid = Math.floor(sorted.length / 2);
+        const median = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
         const min = sorted[0];
         const max = sorted[sorted.length - 1];
         
-        const variance = vals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / vals.length;
+        const variance = vals.length > 1
+          ? vals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (vals.length - 1)
+          : 0;
         const sd = Math.sqrt(variance);
 
         summary.push({
@@ -642,6 +649,102 @@ export default function AnalyseModule() {
   
   const totalPages = Math.ceil(filteredDatasetRows.length / 10);
   const paginatedRows = filteredDatasetRows.slice((currentPage - 1) * 10, currentPage * 10);
+
+  if (view === 'dashboard') {
+    const steps = getModule('analyze').features
+      .filter(f => f.id !== 'chat')
+      .map(f => ({ ...f, key: f.id, desc: STEPS.find(s => s.id === f.id)?.desc }));
+    const stepKeys = steps.map(s => s.key);
+    const isDataset = (d) => ['.csv', '.xlsx'].includes(d.file_type);
+    const protocols = allDocs.filter(d => !isDataset(d));
+    const datasets = allDocs.filter(isDataset);
+    const counts = progressCounts(protocols, stepKeys);
+    const activeDone = stepKeys.filter(k => results[k]).length;
+    const numericStats = statSummary.filter(s => s.type === 'Numeric');
+
+    return (
+      <div className="dash">
+        <DashboardHeader
+          title="Welcome to Analyse"
+          subtitle="Formulate SAP parameters, track study endpoints, evaluate database readiness checklists, and compile descriptive statistics reports."
+        >
+          <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+            {isUploadingDoc ? 'Uploading...' : '📁 Ingest Protocol'}
+            <input type="file" accept=".pdf,.docx,.doc,.txt" style={{ display: 'none' }} disabled={isUploadingDoc}
+              onChange={(e) => { handleUploadDoc(e.target.files[0]); e.target.value = ''; }} />
+          </label>
+          <label className="btn btn-primary" style={{ cursor: 'pointer' }}>
+            {isUploadingData ? 'Uploading...' : '📊 Ingest Dataset'}
+            <input type="file" accept=".csv,.xlsx" style={{ display: 'none' }} disabled={isUploadingData}
+              onChange={(e) => { handleUploadDataset(e.target.files[0]); e.target.value = ''; }} />
+          </label>
+        </DashboardHeader>
+
+        {error && (
+          <div className="error-banner">
+            <span>⚠️</span>
+            <span style={{ flex: 1 }}>{error}</span>
+            <button className="btn btn-sm btn-secondary" onClick={() => setError('')}>Dismiss</button>
+          </div>
+        )}
+
+        <StatGrid items={[
+          { label: 'Protocols', value: protocols.length, sub: 'PDF / DOCX / TXT', tone: 2 },
+          { label: 'Datasets', value: datasets.length, sub: 'CSV / XLSX', tone: 3 },
+          { label: 'Analysis Outputs', value: counts.stepsDone, sub: 'Across all protocols', tone: 4 },
+          { label: 'Active Protocol', value: `${activeDone}/8`, sub: currentDoc ? 'Steps generated' : 'None selected', tone: 6 },
+          { label: 'Active Dataset Rows', value: datasetDoc ? datasetParsed.data.length.toLocaleString() : '—', sub: datasetDoc ? `${datasetParsed.headers.length} columns` : 'No dataset selected', tone: 5 },
+        ]} />
+
+        <Panel title="Documents & Datasets" flush>
+          <DocumentTable
+            docs={allDocs}
+            stepKeys={stepKeys}
+            activeIds={[currentDoc?.id, datasetDoc?.id].filter(Boolean)}
+            onOpen={(d) => (isDataset(d) ? selectDataset(d) : selectDocument(d))}
+            openLabel="Set Active"
+            emptyText="No documents uploaded yet. Use Ingest Protocol or Ingest Dataset."
+          />
+        </Panel>
+
+        <div className="dash-grid">
+          <Panel title="Analysis Step Coverage">
+            <StepCoverage steps={steps} docs={protocols} onOpen={onNavigate} />
+          </Panel>
+
+          <Panel title="Active Dataset" action={datasetDoc ? { label: 'Descriptive Statistics', onClick: () => onNavigate('descriptive_stats') } : null} flush={numericStats.length > 0}>
+            {!datasetDoc ? (
+              <div className="dash-empty">No dataset selected. Ingest a CSV or set one active from the table.</div>
+            ) : !numericStats.length ? (
+              <div className="dash-empty">{datasetDoc.filename}: no numeric variables found.</div>
+            ) : (
+              <div className="table-scroll">
+                <table className="dash-table">
+                  <thead><tr><th>Variable</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th></tr></thead>
+                  <tbody>
+                    {numericStats.slice(0, 6).map(s => (
+                      <tr key={s.variable}>
+                        <td className="row-title">{s.variable}</td>
+                        <td>{s.mean}</td><td>{s.sd}</td><td>{s.min}</td><td>{s.max}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
+        </div>
+
+        <Panel title="Features">
+          <FeatureCards
+            features={getModule('analyze').features.map(f => ({ ...f, desc: STEPS.find(s => s.id === f.id)?.desc }))}
+            doneIds={STEPS.filter(s => results[s.id]).map(s => s.id)}
+            onOpen={onNavigate}
+          />
+        </Panel>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 24, padding: '12px 0' }}>
