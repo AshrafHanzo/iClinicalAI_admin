@@ -167,6 +167,8 @@ def fetch_live_trials_from_api(filters: dict) -> list:
         query_parts.append(f'AREA[SponsorCollaboratorSearch]"{filters["sponsor"]}"')
     if filters.get("drug_name"):
         query_parts.append(f'AREA[InterventionNameSearch]"{filters["drug_name"]}"')
+    if filters.get("country"):
+        query_parts.append(f'AREA[LocationCountry]"{filters["country"]}"')
     if filters.get("phase") and filters.get("phase") != "All":
         phase_map = {
             "Phase I": "PHASE1",

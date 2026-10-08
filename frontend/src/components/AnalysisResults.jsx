@@ -123,9 +123,14 @@ export default function AnalysisResults({
   onSendChatMessage,
   isChatting,
   docStats,
-  onUpdateStats
+  onUpdateStats,
+  activeTab: controlledTab,
+  onTabChange
 }) {
-  const [activeTab, setActiveTab] = useState('extract');
+  const [internalTab, setInternalTab] = useState('extract');
+  // When the module sidebar drives the step, the tabs stay in sync with it.
+  const activeTab = controlledTab || internalTab;
+  const setActiveTab = onTabChange || setInternalTab;
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isGeneratingDashboard, setIsGeneratingDashboard] = useState(false);
   const [dashboardError, setDashboardError] = useState('');
@@ -488,7 +493,7 @@ export default function AnalysisResults({
 
       {renderDashboardPanel()}
 
-      {isLoading && (loadingType === activeTab || loadingType === 'full') ? (
+      {isLoading && (TABS.find(t => t.id === activeTab)?.type === loadingType || loadingType === 'full') ? (
         <div className="loading-spinner">
           <div className="spinner"></div>
           <span>AI is analyzing your clinical document...</span>

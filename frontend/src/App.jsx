@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
+import { getModule } from './moduleNav';
 import DashboardView from './pages/DashboardView';
 import DesignModule from './pages/DesignModule';
 import FindModule from './pages/FindModule';
@@ -8,8 +9,30 @@ import AnalyseModule from './pages/AnalyseModule';
 import SafetyModule from './pages/SafetyModule';
 import { getMe, sendHeartbeat, logoutUser } from './services/api';
 
+// URL hash holds the module and its page, e.g. #/design/dashboard or #/design/summary.
+function routeFromHash() {
+  const [module, view] = window.location.hash.replace(/^#\/?/, '').split('/');
+  const mod = getModule(module);
+  if (!mod) return { module: 'dashboard', view: 'dashboard' };
+  const known = view && mod.features.some(f => f.id === view);
+  return { module, view: known ? view : 'dashboard' };
+}
+
 function App() {
-  const [currentModule, setCurrentModule] = useState('dashboard');
+  const [route, setRoute] = useState(routeFromHash);
+  const currentModule = route.module;
+
+  const navigate = (module, view = 'dashboard') => {
+    window.location.hash = module === 'dashboard' ? '/dashboard' : `/${module}/${view}`;
+    setRoute({ module, view });
+  };
+  const setCurrentModule = (id) => navigate(id);
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(routeFromHash());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -31,7 +54,7 @@ function App() {
         // Sync to cookie
         document.cookie = `iclinical_token=${tokenFromUrl}; path=/; max-age=2592000; samesite=lax`;
         // Clean URL parameter
-        const newUrl = window.location.pathname;
+        const newUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({}, document.title, newUrl);
       }
 
@@ -222,21 +245,25 @@ function App() {
     );
   }
 
+  const moduleProps = { view: route.view, onNavigate: (view) => navigate(currentModule, view) };
+
   return (
     <div className="app-layout">
-      <Sidebar 
-        currentModule={currentModule} 
-        onChangeModule={setCurrentModule} 
-        user={user} 
-        onLogout={handleLogout} 
+      <Sidebar
+        currentModule={currentModule}
+        currentView={route.view}
+        onChangeModule={setCurrentModule}
+        onNavigate={moduleProps.onNavigate}
+        user={user}
+        onLogout={handleLogout}
       />
       <main className="main-content">
         {currentModule === 'dashboard' && <DashboardView user={user} onLogout={handleLogout} onChangeModule={setCurrentModule} />}
-        {currentModule === 'design' && <DesignModule />}
-        {currentModule === 'find' && <FindModule />}
-        {currentModule === 'manage' && <ManageModule />}
-        {currentModule === 'analyze' && <AnalyseModule />}
-        {currentModule === 'safety' && <SafetyModule />}
+        {currentModule === 'design' && <DesignModule {...moduleProps} />}
+        {currentModule === 'find' && <FindModule {...moduleProps} />}
+        {currentModule === 'manage' && <ManageModule {...moduleProps} />}
+        {currentModule === 'analyze' && <AnalyseModule {...moduleProps} />}
+        {currentModule === 'safety' && <SafetyModule {...moduleProps} />}
       </main>
     </div>
   );

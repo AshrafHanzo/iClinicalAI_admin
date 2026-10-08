@@ -1,4 +1,6 @@
-export default function Sidebar({ currentModule, onChangeModule, user, onLogout }) {
+import { getModule } from '../moduleNav';
+
+export default function Sidebar({ currentModule, currentView, onChangeModule, onNavigate, user, onLogout }) {
   const modules = [
     {
       id: 'dashboard',
@@ -25,7 +27,7 @@ export default function Sidebar({ currentModule, onChangeModule, user, onLogout 
           <line x1="10" y1="9" x2="8" y2="9"/>
         </svg>
       ),
-      label: 'Protocol Review',
+      label: 'DESIGN',
       desc: 'Protocol & Study Design',
       active: currentModule === 'design'
     },
@@ -37,8 +39,8 @@ export default function Sidebar({ currentModule, onChangeModule, user, onLogout 
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
       ),
-      label: 'Trial Search',
-      desc: 'FIND Module',
+      label: 'FIND',
+      desc: 'Trial Search',
       active: currentModule === 'find'
     },
     {
@@ -50,8 +52,8 @@ export default function Sidebar({ currentModule, onChangeModule, user, onLogout 
           <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
         </svg>
       ),
-      label: 'Data Management',
-      desc: 'MANAGE Module',
+      label: 'MANAGE',
+      desc: 'Data Management',
       active: currentModule === 'manage'
     },
     {
@@ -63,8 +65,8 @@ export default function Sidebar({ currentModule, onChangeModule, user, onLogout 
           <line x1="6" y1="20" x2="6" y2="14"/>
         </svg>
       ),
-      label: 'Biostatistics',
-      desc: 'ANALYZE Module',
+      label: 'ANALYSE',
+      desc: 'Biostatistics',
       active: currentModule === 'analyze'
     },
     {
@@ -74,8 +76,8 @@ export default function Sidebar({ currentModule, onChangeModule, user, onLogout 
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
       ),
-      label: 'Pharmacovigilance',
-      desc: 'SAFETY Module',
+      label: 'SAFETY',
+      desc: 'Pharmacovigilance',
       active: currentModule === 'safety'
     },
     {
@@ -119,8 +121,8 @@ export default function Sidebar({ currentModule, onChangeModule, user, onLogout 
       <nav className="sidebar-nav">
         <div className="nav-section-title">Modules</div>
         {modules.map(m => (
-          <div 
-            key={m.id} 
+          <div key={m.id}>
+          <div  
             className={`nav-item ${m.active ? 'active' : ''} ${m.disabled ? 'disabled' : ''}`}
             onClick={() => {
               if (!m.disabled && onChangeModule) {
@@ -135,6 +137,20 @@ export default function Sidebar({ currentModule, onChangeModule, user, onLogout 
               <div className="nav-desc">{m.desc}</div>
             </div>
             {m.disabled && <span className="nav-badge">Soon</span>}
+          </div>
+          {m.active && getModule(m.id) && (
+            <div className="nav-subitems">
+              {[{ id: 'dashboard', label: 'Dashboard' }, ...getModule(m.id).features].map(f => (
+                <div
+                  key={f.id}
+                  className={`nav-subitem ${currentView === f.id ? 'active' : ''}`}
+                  onClick={() => onNavigate(f.id)}
+                >
+                  {f.label}
+                </div>
+              ))}
+            </div>
+          )}
           </div>
         ))}
       </nav>
