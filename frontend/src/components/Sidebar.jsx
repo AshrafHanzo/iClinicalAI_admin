@@ -1,6 +1,4 @@
-import { getModule } from '../moduleNav';
-
-export default function Sidebar({ currentModule, currentView, onChangeModule, onNavigate, user, onLogout }) {
+export default function Sidebar({ currentModule, onChangeModule, user, onLogout }) {
   const modules = [
     {
       id: 'dashboard',
@@ -121,8 +119,8 @@ export default function Sidebar({ currentModule, currentView, onChangeModule, on
       <nav className="sidebar-nav">
         <div className="nav-section-title">Modules</div>
         {modules.map(m => (
-          <div key={m.id}>
-          <div  
+          <div 
+            key={m.id}   
             className={`nav-item ${m.active ? 'active' : ''} ${m.disabled ? 'disabled' : ''}`}
             onClick={() => {
               if (!m.disabled && onChangeModule) {
@@ -137,20 +135,6 @@ export default function Sidebar({ currentModule, currentView, onChangeModule, on
               <div className="nav-desc">{m.desc}</div>
             </div>
             {m.disabled && <span className="nav-badge">Soon</span>}
-          </div>
-          {m.active && getModule(m.id) && (
-            <div className="nav-subitems">
-              {[{ id: 'dashboard', label: 'Dashboard' }, ...getModule(m.id).features].map(f => (
-                <div
-                  key={f.id}
-                  className={`nav-subitem ${currentView === f.id ? 'active' : ''}`}
-                  onClick={() => onNavigate(f.id)}
-                >
-                  {f.label}
-                </div>
-              ))}
-            </div>
-          )}
           </div>
         ))}
       </nav>

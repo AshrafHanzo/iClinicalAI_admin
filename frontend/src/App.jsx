@@ -250,11 +250,9 @@ function App() {
   return (
     <div className="app-layout">
       <Sidebar
-        currentModule={currentModule}
-        currentView={route.view}
-        onChangeModule={setCurrentModule}
-        onNavigate={moduleProps.onNavigate}
-        user={user}
+        currentModule={currentModule} 
+        onChangeModule={setCurrentModule} 
+        user={user} 
         onLogout={handleLogout}
       />
       <main className="main-content">

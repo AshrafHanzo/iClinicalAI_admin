@@ -263,14 +263,14 @@ function ProtocolSelector({ allDocs, currentDoc, onSelect, onDelete }) {
 // ─── WORKFLOW STEPS ──────────────────────────────────────────────────
 
 const STEPS = [
-  { id: 'study_review', label: '1. Study Analysis Review', icon: '📋', desc: 'Summarize study protocol statistical designs' },
-  { id: 'endpoint_summary', label: '2. Endpoint Summary', icon: '🎯', desc: 'Identify primary, secondary and safety targets' },
-  { id: 'sap_outline', label: '3. SAP Outline Structure', icon: '📝', desc: 'Draft statistical analysis plan outline' },
-  { id: 'tlf_shells', label: '4. TLF Shell Draft Package', icon: '📊', desc: 'Design mockup table, listing & figure shells' },
-  { id: 'dataset_checklist', label: '5. Dataset Review Checklist', icon: '✔️', desc: 'Database readiness and compliance audit' },
-  { id: 'descriptive_stats', label: '6. Descriptive Statistics', icon: '📈', desc: 'Compute on-the-fly statistics and summary tables' },
-  { id: 'clinical_interpretation', label: '7. Clinical Interpretation', icon: '💡', desc: 'Synthesize safety & efficacy result insights' },
-  { id: 'csr_results', label: '8. CSR Results Draft', icon: '✍️', desc: 'Produce copy-paste clinical study report prose' },
+  { id: 'study_review', label: 'Study Analysis Review', icon: '📋', desc: 'Summarize study protocol statistical designs' },
+  { id: 'endpoint_summary', label: 'Endpoint Summary', icon: '🎯', desc: 'Identify primary, secondary and safety targets' },
+  { id: 'sap_outline', label: 'SAP Outline Structure', icon: '📝', desc: 'Draft statistical analysis plan outline' },
+  { id: 'tlf_shells', label: 'TLF Shell Draft Package', icon: '📊', desc: 'Design mockup table, listing & figure shells' },
+  { id: 'dataset_checklist', label: 'Dataset Review Checklist', icon: '✔️', desc: 'Database readiness and compliance audit' },
+  { id: 'descriptive_stats', label: 'Descriptive Statistics', icon: '📈', desc: 'Compute on-the-fly statistics and summary tables' },
+  { id: 'clinical_interpretation', label: 'Clinical Interpretation', icon: '💡', desc: 'Synthesize safety & efficacy result insights' },
+  { id: 'csr_results', label: 'CSR Results Draft', icon: '✍️', desc: 'Produce copy-paste clinical study report prose' },
   { id: 'chat', label: '💬 Biostatistician Chat', icon: '🤖', desc: 'Chat directly with your study protocol & data' }
 ];
 

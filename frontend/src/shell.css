@@ -1,12 +1,3 @@
-/* ─── Sidebar: features of the active module, listed under it ─── */
-.nav-subitems { margin: 2px 0 10px 30px; padding-left: 10px; border-left: 2px solid var(--border); }
-.nav-subitem {
-  padding: 7px 10px; margin-bottom: 2px; border-radius: var(--radius-sm); cursor: pointer;
-  font-size: 12.5px; font-weight: 500; color: var(--text-secondary); transition: var(--transition);
-}
-.nav-subitem:hover { background: var(--bg-hover); color: var(--text-primary); }
-.nav-subitem.active { background: var(--bg-sidebar-active); color: var(--accent); font-weight: 650; }
-
 /* ─── Module dashboards ─── */
 .dash { display: flex; flex-direction: column; gap: 22px; }
 .dash-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
