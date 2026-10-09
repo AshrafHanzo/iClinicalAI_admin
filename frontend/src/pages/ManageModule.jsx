@@ -222,13 +222,13 @@ function ProtocolSelector({ allDocs, currentDoc, onSelect, onDelete }) {
 }
 
 const STEPS = [
-  { id: 'crf_review', label: 'Step 1: CRF Review', icon: '📋', desc: 'Identify data capture gaps and logic errors' },
-  { id: 'edit_checks', label: 'Step 2: Edit Checks', icon: '⚡', desc: 'Generate logic checks for validation' },
-  { id: 'query_wording', label: 'Step 3: Query Wording', icon: '✍️', desc: 'Translate raw reviewer notes to standard queries' },
-  { id: 'cleaning_checklist', label: 'Step 4: Cleaning Checklist', icon: '✅', desc: 'Build study-specific cleaning guides' },
-  { id: 'medical_coding', label: 'Step 5: Coding Review', icon: '🏷️', desc: 'Audit adverse events and WHO-Drug lists' },
-  { id: 'dataset_review', label: 'Step 6: Dataset Review', icon: '📊', desc: 'Programmatic CSV validator & AI anomalies' },
-  { id: 'review_summary', label: 'Step 7: Review Summary', icon: '📝', desc: 'Produce executive CDM readiness reports' },
+  { id: 'crf_review', label: 'CRF Review', icon: '📋', desc: 'Identify data capture gaps and logic errors' },
+  { id: 'edit_checks', label: 'Edit Checks', icon: '⚡', desc: 'Generate logic checks for validation' },
+  { id: 'query_wording', label: 'Query Wording', icon: '✍️', desc: 'Translate raw reviewer notes to standard queries' },
+  { id: 'cleaning_checklist', label: 'Cleaning Checklist', icon: '✅', desc: 'Build study-specific cleaning guides' },
+  { id: 'medical_coding', label: 'Coding Review', icon: '🏷️', desc: 'Audit adverse events and WHO-Drug lists' },
+  { id: 'dataset_review', label: 'Dataset Review', icon: '📊', desc: 'Programmatic CSV validator & AI anomalies' },
+  { id: 'review_summary', label: 'Review Summary', icon: '📝', desc: 'Produce executive CDM readiness reports' },
 ];
 
 export default function ManageModule({ view = 'dashboard', onNavigate = () => {} }) {
@@ -516,7 +516,7 @@ export default function ManageModule({ view = 'dashboard', onNavigate = () => {}
 
           <Panel title="Clinical Dataset" action={{ label: 'Open Dataset Review', onClick: () => onNavigate('dataset_review') }}>
             {!summary ? (
-              <div className="dash-empty">No dataset loaded. Upload a CSV or load the demo dataset in Step 6: Dataset Review.</div>
+              <div className="dash-empty">No dataset loaded. Upload a CSV or load the demo dataset in Dataset Review.</div>
             ) : (
               <>
                 <div style={{ fontWeight: 650, color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>{activeDatasetName}</div>
@@ -616,7 +616,7 @@ export default function ManageModule({ view = 'dashboard', onNavigate = () => {}
             {activeDatasetName ? activeDatasetName : 'No Dataset Loaded'}
           </div>
           <div className="stat-desc">
-            {auditResult ? `${auditResult.summary.total_rows} rows • ${auditResult.summary.total_cols} columns` : 'Upload CSV inside Step 6'}
+            {auditResult ? `${auditResult.summary.total_rows} rows • ${auditResult.summary.total_cols} columns` : 'Upload CSV in Dataset Review'}
           </div>
         </div>
 

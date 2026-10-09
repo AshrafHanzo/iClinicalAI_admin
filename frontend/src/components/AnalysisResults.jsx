@@ -3,12 +3,12 @@ import ChatInterface from './ChatInterface';
 import { getOrGenerateDashboard } from '../services/api';
 
 const TABS = [
-  { id: 'extract', label: 'Step 1: Protocol Review', type: 'extract' },
-  { id: 'summary', label: 'Step 2: Protocol Synopsis', type: 'summarize' },
-  { id: 'eligibility', label: 'Step 3: Eligibility Criteria Review', type: 'eligibility' },
-  { id: 'gaps', label: 'Step 4: Protocol Gap Assessment', type: 'gaps' },
-  { id: 'feasibility', label: 'Step 5: Study Feasibility Review', type: 'feasibility' },
-  { id: 'recommendations', label: 'Step 6: Study Design Optimization', type: 'recommendations' },
+  { id: 'extract', label: 'Protocol Review', type: 'extract' },
+  { id: 'summary', label: 'Protocol Synopsis', type: 'summarize' },
+  { id: 'eligibility', label: 'Eligibility Criteria Review', type: 'eligibility' },
+  { id: 'gaps', label: 'Protocol Gap Assessment', type: 'gaps' },
+  { id: 'feasibility', label: 'Study Feasibility Review', type: 'feasibility' },
+  { id: 'recommendations', label: 'Study Design Optimization', type: 'recommendations' },
   { id: 'chat', label: '💬 Ask AI', type: 'chat' },
 ];
 

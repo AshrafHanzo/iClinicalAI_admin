@@ -275,15 +275,15 @@ export default function FindModule({ view = 'dashboard', onNavigate = () => {} }
 
   // Step definition mapping
   const STEPS = [
-    { id: 'results', label: 'Step 1: Search Results' },
-    { id: 'metadata', label: 'Step 2: Metadata', type: 'metadata', needsSelection: true },
-    { id: 'summary', label: 'Step 3: Summary', type: 'summary', needsSelection: true },
-    { id: 'similar', label: 'Step 4: Similar Trials', type: 'similar', needsSelection: true },
-    { id: 'comparison', label: 'Step 5: Comparison', type: 'comparison', needsSelection: true, minCount: 2 },
-    { id: 'recruiting', label: 'Step 6: Recruiting', type: 'recruiting', needsSelection: true },
-    { id: 'gaps', label: 'Step 7: Gaps', type: 'gaps' },
-    { id: 'topics', label: 'Step 8: Topics', type: 'topics' },
-    { id: 'dissertation', label: 'Step 9: Dissertation', type: 'dissertation' },
+    { id: 'results', label: 'Search Results' },
+    { id: 'metadata', label: 'Metadata', type: 'metadata', needsSelection: true },
+    { id: 'summary', label: 'Summary', type: 'summary', needsSelection: true },
+    { id: 'similar', label: 'Similar Trials', type: 'similar', needsSelection: true },
+    { id: 'comparison', label: 'Comparison', type: 'comparison', needsSelection: true, minCount: 2 },
+    { id: 'recruiting', label: 'Recruiting', type: 'recruiting', needsSelection: true },
+    { id: 'gaps', label: 'Gaps', type: 'gaps' },
+    { id: 'topics', label: 'Topics', type: 'topics' },
+    { id: 'dissertation', label: 'Dissertation', type: 'dissertation' },
     { id: 'chat', label: '💬 Ask AI' }
   ];
 
@@ -775,7 +775,7 @@ export default function FindModule({ view = 'dashboard', onNavigate = () => {} }
                   <span style={{ fontSize: 36 }}>⚠️</span>
                   <h4 style={{ marginTop: 12 }}>Selection Required</h4>
                   <p>
-                    Please select at least {minCount} trial(s) in the <strong>Step 1: Search Results</strong> tab to run this analysis.
+                    Please select at least {minCount} trial(s) in the <strong>Search Results</strong> tab to run this analysis.
                   </p>
                   <button className="btn btn-primary btn-sm" style={{ marginTop: 16 }} onClick={() => setActiveTab('results')}>
                     Go to Search Results

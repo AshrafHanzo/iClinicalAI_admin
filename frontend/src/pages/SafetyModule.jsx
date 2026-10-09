@@ -763,7 +763,7 @@ export default function SafetyModule({ view = 'dashboard', onNavigate = () => {}
                       color: isActive || isCompleted ? 'white' : 'var(--text-secondary)',
                       flexShrink: 0
                     }}>
-                      {isCompleted ? '✓' : step.num}
+                      {isCompleted ? '✓' : step.icon}
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -795,7 +795,7 @@ export default function SafetyModule({ view = 'dashboard', onNavigate = () => {}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: 16, marginBottom: 20 }}>
                 <div>
                   <h3 style={{ fontSize: 17, color: 'var(--text-primary)', fontWeight: 700 }}>
-                    {STEPS.find(s => s.id === activeStep)?.icon} Step {activeStep}: {STEPS.find(s => s.id === activeStep)?.label}
+                    {STEPS.find(s => s.id === activeStep)?.icon} {STEPS.find(s => s.id === activeStep)?.label}
                   </h3>
                   <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
                     {STEPS.find(s => s.id === activeStep)?.desc}
@@ -808,7 +808,7 @@ export default function SafetyModule({ view = 'dashboard', onNavigate = () => {}
                   disabled={isAnalyzing || !doc}
                   style={{ minWidth: '160px' }}
                 >
-                  {isAnalyzing ? 'Analyzing...' : `🛡️ Run Step ${activeStep} Review`}
+                  {isAnalyzing ? 'Analyzing...' : '🛡️ Run Review'}
                 </button>
               </div>
 
@@ -828,7 +828,7 @@ export default function SafetyModule({ view = 'dashboard', onNavigate = () => {}
                   <span style={{ fontSize: 32 }}>🛡️</span>
                   <h4 style={{ margin: '14px 0 6px', color: 'var(--text-primary)', fontSize: 15, fontWeight: 700 }}>Analysis Pending</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: 13, maxWidth: 380, textAlign: 'center' }}>
-                    Click the <strong>Run Step {activeStep} Review</strong> button to trigger the pharmacovigilance safety evaluation for this step.
+                    Click the <strong>Run Review</strong> button to trigger the pharmacovigilance safety evaluation for this step.
                   </p>
                 </div>
               )}
