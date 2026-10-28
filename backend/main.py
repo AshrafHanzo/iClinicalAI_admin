@@ -15,6 +15,8 @@ from routes.biostats import router as biostats_router
 from routes.safety import router as safety_router
 from routes.admin import router as admin_router
 from routes.contact import router as contact_router
+from routes.design import router as design_router
+from routes.design_analysis import router as design_analysis_router
 
 from database import init_db
 init_db()
@@ -55,6 +57,8 @@ app.include_router(biostats_router)
 app.include_router(safety_router)
 app.include_router(admin_router)
 app.include_router(contact_router)
+app.include_router(design_router)
+app.include_router(design_analysis_router)
 
 
 

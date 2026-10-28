@@ -4,11 +4,11 @@ import { getOrGenerateDashboard } from '../services/api';
 
 const TABS = [
   { id: 'extract', label: 'Protocol Review', type: 'extract' },
-  { id: 'summary', label: 'Protocol Synopsis', type: 'summarize' },
-  { id: 'eligibility', label: 'Eligibility Criteria Review', type: 'eligibility' },
+  { id: 'summary', label: 'Synopsis Generator', type: 'summarize' },
+  { id: 'eligibility', label: 'Eligibility Intelligence', type: 'eligibility' },
   { id: 'gaps', label: 'Protocol Gap Assessment', type: 'gaps' },
-  { id: 'feasibility', label: 'Study Feasibility Review', type: 'feasibility' },
-  { id: 'recommendations', label: 'Study Design Optimization', type: 'recommendations' },
+  { id: 'feasibility', label: 'Study Feasibility', type: 'feasibility' },
+  { id: 'recommendations', label: 'Study Design Optimizer', type: 'recommendations' },
   { id: 'chat', label: '💬 Ask AI', type: 'chat' },
 ];
 
@@ -125,7 +125,9 @@ export default function AnalysisResults({
   docStats,
   onUpdateStats,
   activeTab: controlledTab,
-  onTabChange
+  onTabChange,
+  hideTabs = false,
+  excludeTabs = []
 }) {
   const [internalTab, setInternalTab] = useState('extract');
   // When the module sidebar drives the step, the tabs stay in sync with it.
@@ -473,8 +475,8 @@ export default function AnalysisResults({
         </div>
       </div>
 
-      <div className="tabs">
-        {TABS.map(tab => (
+      {!hideTabs && <div className="tabs">
+        {TABS.filter(t => !excludeTabs.includes(t.id)).map(tab => (
           <button
             key={tab.id}
             className={`tab ${activeTab === tab.id ? 'active' : ''}`}
@@ -489,7 +491,7 @@ export default function AnalysisResults({
             )}
           </button>
         ))}
-      </div>
+      </div>}
 
       {renderDashboardPanel()}
 

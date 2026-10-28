@@ -42,6 +42,36 @@ async def chat_completion(
         raise Exception(f"OpenAI API error: {str(e)}")
 
 
+def ai_available() -> bool:
+    """True when an OpenAI key is configured. DESIGN features fall back to rule-based processing otherwise."""
+    return bool(OPENAI_API_KEY)
+
+
+async def chat_completion_json(
+    system_prompt: str,
+    user_message: str,
+    temperature: float = 0.0,
+    max_tokens: int = 8000,
+) -> dict:
+    """Chat completion constrained to a JSON object response."""
+    import json
+    try:
+        client = get_client()
+        response = await client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            response_format={"type": "json_object"},
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        raise Exception(f"OpenAI API error: {str(e)}")
+
+
 async def chat_completion_with_history(
     system_prompt: str,
     messages: list[dict],

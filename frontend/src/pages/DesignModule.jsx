@@ -4,6 +4,30 @@ import AnalysisResults from '../components/AnalysisResults';
 import { uploadDocument, runAnalysis, chatWithDocument, listDocuments, getDocument, deleteDocument, getOrGenerateDashboard } from '../services/api';
 import { DashboardHeader, Panel, FeatureCards, StatGrid, DocumentTable, StepCoverage, progressCounts } from '../components/ModuleDashboard';
 import { getModule } from '../moduleNav';
+import { createStudy, getStudy, listStudies } from '../services/designApi';
+import StudyHeader from '../components/design/StudyHeader';
+import { StatRow, WorkflowSteps } from '../components/design/DesignUi';
+import ProtocolIntelligence from '../components/design/ProtocolIntelligence';
+import EndpointIntelligence from '../components/design/EndpointIntelligence';
+import ProtocolReview from '../components/design/ProtocolReview';
+import ScheduleOfAssessments from '../components/design/ScheduleOfAssessments';
+import SampleSizePower from '../components/design/SampleSizePower';
+import VersionControl from '../components/design/VersionControl';
+import DesignReports from '../components/design/DesignReports';
+import ChatInterface from '../components/ChatInterface';
+import '../components/design/design.css';
+
+// Capabilities 02–05, 08 and 09 run on the existing per-document analyses.
+// Features served by the original per-document analyses. Protocol Review ('extract') is a study-version capability.
+const EXISTING_FEATURES = ['summary', 'eligibility', 'gaps', 'feasibility', 'recommendations'];
+const TERMINAL = ['completed', 'failed'];
+
+function readPref(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function writePref(key, value) {
+  try { value ? localStorage.setItem(key, value) : localStorage.removeItem(key); } catch { /* storage unavailable */ }
+}
 
 // Custom-designed premium Protocol Selector dropdown
 function ProtocolSelector({ allDocs, currentDoc, onSelect, onDelete }) {
@@ -386,6 +410,103 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
     fetchDocsList();
   }, []);
 
+  // ─── Study / protocol version context shared by all 12 capabilities ───
+  const [studies, setStudies] = useState([]);
+  const [registeredDocIds, setRegisteredDocIds] = useState([]);
+  const [study, setStudy] = useState(null);
+  const [versionId, setVersionId] = useState(null);
+  const version = study?.versions?.find(v => v.id === versionId) || null;
+
+  const refreshStudies = async () => {
+    try {
+      const r = await listStudies();
+      setStudies(r.studies);
+      setRegisteredDocIds(r.registered_document_ids);
+      return r.studies;
+    } catch (err) {
+      setError('Failed to load studies: ' + err.message);
+      return [];
+    }
+  };
+
+  // Existing capabilities follow the selected version's document (when the user can open it).
+  const syncDocument = async (v) => {
+    if (!v || v.processing_status !== 'completed') return;
+    try {
+      await getDocument(v.document_id);
+      await handleSelectDocument(v.document_id);
+    } catch { /* shared study whose document belongs to another user */ }
+  };
+
+  const selectStudy = async (id, preferredVersion = null) => {
+    writePref('ds_study', id);
+    if (!id) { setStudy(null); setVersionId(null); return; }
+    try {
+      const s = await getStudy(id);
+      setStudy(s);
+      const vid = (preferredVersion && s.versions.some(v => v.id === preferredVersion)) ? preferredVersion
+        : s.versions.length ? s.versions[s.versions.length - 1].id : null;
+      setVersionId(vid);
+      writePref('ds_version', vid);
+      syncDocument(s.versions.find(v => v.id === vid));
+    } catch (err) {
+      setError(err.message);
+      setStudy(null);
+    }
+  };
+
+  const selectVersion = (vid) => {
+    setVersionId(vid);
+    writePref('ds_version', vid);
+    syncDocument(study?.versions.find(v => v.id === vid));
+  };
+
+  const reloadStudy = async (preferredVersion) => {
+    if (!study) return;
+    await selectStudy(study.id, preferredVersion || versionId);
+    refreshStudies();
+  };
+
+  useEffect(() => {
+    refreshStudies().then(list => {
+      const sid = readPref('ds_study');
+      if (sid && list.some(s => s.id === sid)) selectStudy(sid, readPref('ds_version'));
+    });
+  }, []);
+
+  // Poll while the selected version is being processed so status and errors stay visible.
+  useEffect(() => {
+    if (!study || !version || TERMINAL.includes(version.processing_status)) return;
+    const t = setTimeout(async () => {
+      try {
+        const s = await getStudy(study.id);
+        setStudy(s);
+        const v = s.versions.find(x => x.id === versionId);
+        if (v && TERMINAL.includes(v.processing_status)) {
+          fetchDocsList();
+          syncDocument(v);
+        }
+      } catch { /* keep the last known state */ }
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [study, versionId, version?.processing_status, version?.processing_progress]);
+
+  const [featureSummary, setFeatureSummary] = useState(null);
+  useEffect(() => { setFeatureSummary(null); }, [view, versionId]);
+
+  const handleCreateStudy = async (data) => {
+    const s = await createStudy(data);
+    await refreshStudies();
+    await selectStudy(s.id);
+    onNavigate('intelligence');
+  };
+
+  const handleRegistered = async (v) => {
+    await selectStudy(v.study_id, v.id);
+    refreshStudies();
+    fetchDocsList();
+  };
+
   const handleSelectDocument = async (docId) => {
     setError('');
     try {
@@ -510,19 +631,6 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
     }
   };
 
-  const formatSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
-  const steps = [
-    { num: 1, label: 'Upload Document' },
-    { num: 2, label: 'AI Processing' },
-    { num: 3, label: 'Review Results' },
-    { num: 4, label: 'Chat & Refine' },
-  ];
-
   const completedAnalyses = Object.values(results).filter(v => v).length;
 
   const handleGenerateOverview = async () => {
@@ -574,6 +682,35 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
           { label: 'Not Started', value: counts.not_started, sub: 'No analysis yet', tone: 5 },
           { label: 'Analyses Run', value: counts.stepsDone, sub: 'Across all protocols', tone: 6 },
         ]} />
+
+        <Panel title="Studies" flush action={{ label: 'Open Protocol Intelligence', onClick: () => onNavigate('intelligence') }}>
+          {!studies.length ? (
+            <div className="dash-empty">No studies yet. Open Protocol Intelligence to create a study and register its protocol.</div>
+          ) : (
+            <div className="table-scroll">
+              <table className="dash-table">
+                <thead><tr><th>Study ID</th><th>Title</th><th>Versions</th><th>Latest version</th><th>Processing</th><th>Review</th><th>Role</th><th className="right">Action</th></tr></thead>
+                <tbody>
+                  {studies.map(s => {
+                    const latest = s.versions[s.versions.length - 1];
+                    return (
+                      <tr key={s.id} className={study?.id === s.id ? 'selected' : ''}>
+                        <td className="row-title">{s.study_code}</td>
+                        <td>{s.title || '—'}</td>
+                        <td>{s.versions.length}</td>
+                        <td>{latest?.label || '—'}</td>
+                        <td>{latest ? <span className={`status-badge ${latest.processing_status === 'completed' ? 'success' : latest.processing_status === 'failed' ? 'error' : 'warning'}`}>{latest.processing_status}</span> : '—'}</td>
+                        <td>{latest ? latest.review_status.replace('_', ' ') : '—'}</td>
+                        <td>{s.role}</td>
+                        <td className="right"><button type="button" className="link-btn" onClick={() => selectStudy(s.id).then(() => onNavigate('intelligence'))}>Open</button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Panel>
 
         <Panel title="Protocols" flush>
           <DocumentTable
@@ -630,25 +767,32 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
     );
   }
 
-  return (
-    <div>
-      <div className="page-header">
-        <h2>📐 DESIGN Module</h2>
-        <p>AI-powered protocol review and study design intelligence</p>
-      </div>
+  const features = getModule('design').features;
+  const feature = features.find(f => f.id === view) || features[0];
+  const featureIndex = features.indexOf(feature) + 1;
+  const role = study?.role || 'viewer';
+  const legacyDocs = allDocs.filter(d => !registeredDocIds.includes(d.id) && ['.pdf', '.docx'].includes(d.file_type));
+  const isExisting = EXISTING_FEATURES.includes(feature.id);
 
-      {/* Unified Document Manager Bar */}
+  const formatSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  // Original DESIGN page: Active Protocol bar, workflow steps, document stats and the analysis results with tabs
+  const existingFeature = (
+    <>
       <div className="card" style={{ marginBottom: 24, padding: '14px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <ProtocolSelector 
+          <ProtocolSelector
             allDocs={allDocs}
             currentDoc={doc}
             onSelect={handleSelectDocument}
             onDelete={handleDelete}
           />
-          
           <div>
-            <button 
+            <button
               className={`btn ${showUploadSection ? 'btn-secondary' : 'btn-primary'} btn-sm`}
               onClick={() => setShowUploadSection(!showUploadSection)}
               style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 6 }}
@@ -659,18 +803,7 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
         </div>
       </div>
 
-      {/* Workflow Steps */}
-      <div className="workflow-steps">
-        {steps.map(s => (
-          <div
-            key={s.num}
-            className={`workflow-step ${currentStep === s.num ? 'active' : ''} ${currentStep > s.num ? 'done' : ''}`}
-          >
-            <div className="step-num">{currentStep > s.num ? '✓' : s.num}</div>
-            <span>{s.label}</span>
-          </div>
-        ))}
-      </div>
+      <WorkflowSteps labels={['Upload Document', 'AI Processing', 'Review Results', 'Chat & Refine']} current={currentStep} />
 
       {error && (
         <div className="error-banner">
@@ -680,7 +813,6 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
         </div>
       )}
 
-      {/* Document Stats */}
       {doc && (
         <div className="stat-row">
           <div className="stat-card">
@@ -714,7 +846,6 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
         </div>
       )}
 
-      {/* Upload Section */}
       {(!doc || showUploadSection) && (
         <div className="card" style={{ marginBottom: 24 }}>
           <div className="card-header">
@@ -724,7 +855,6 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
         </div>
       )}
 
-      {/* Full-width Analysis Workspace */}
       <div style={{ width: '100%' }}>
         <AnalysisResults
           docId={doc?.id}
@@ -737,10 +867,87 @@ export default function DesignModule({ view = 'dashboard', onNavigate = () => {}
           isChatting={isChatting}
           docStats={doc?.stats}
           onUpdateStats={(newStats) => setDoc(prev => ({ ...prev, stats: newStats }))}
-          activeTab={view}
+          activeTab={feature.id}
           onTabChange={onNavigate}
+          excludeTabs={['extract', 'chat']}
         />
       </div>
+    </>
+  );
+
+  // Same layout for the study-version steps: progress through upload, processing, review and approval
+  const fs = featureSummary;
+  let stage = 1;
+  if (version) {
+    if (version.processing_status !== 'completed' || !fs || fs.running || !fs.has) stage = 2;
+    else stage = fs.reviewed ? 4 : 3;
+  }
+  const stageComplete = !!(version && fs?.has && fs.approved);
+  const frameItems = fs?.items || [
+    { label: 'Results', value: '—', desc: 'Loading…' },
+    { label: 'Open Items', value: '—', desc: '' },
+    { label: 'Status', value: '⏳ Pending', badge: 'warning', desc: '' },
+  ];
+
+  const summaryProps = { onSummary: setFeatureSummary };
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>📐 DESIGN Module</h2>
+        <p>AI-powered protocol review and study design intelligence</p>
+      </div>
+
+      {isExisting ? existingFeature : (
+        <>
+          <StudyHeader
+            studies={studies}
+            study={study}
+            version={version}
+            onSelectStudy={(id) => selectStudy(id)}
+            onSelectVersion={selectVersion}
+            onCreateStudy={handleCreateStudy}
+          />
+
+          <WorkflowSteps labels={['Upload Protocol', 'AI Processing', 'Review Results', 'Approve & Export']}
+            current={stage} complete={stageComplete} />
+
+          {error && (
+            <div className="error-banner">
+              <span>❌</span>
+              <span style={{ flex: 1 }}>{error}</span>
+              <button className="btn btn-sm btn-secondary" onClick={() => setError('')}>Dismiss</button>
+            </div>
+          )}
+
+          <StatRow version={version} items={frameItems} />
+
+          <div className="ds-body">
+            <section className="ds-content">
+              <h3 className="ds-content-title">{String(featureIndex).padStart(2, '0')} · {feature.label}</h3>
+              {feature.id === 'intelligence' && (
+                <ProtocolIntelligence study={study} version={version} role={role} legacyDocs={legacyDocs}
+                  onRegistered={handleRegistered} onVersionUpdated={() => reloadStudy()} {...summaryProps} />
+              )}
+              {feature.id === 'extract' && <ProtocolReview study={study} version={version} role={role} {...summaryProps} />}
+              {feature.id === 'endpoints' && <EndpointIntelligence study={study} version={version} role={role} {...summaryProps} />}
+              {feature.id === 'soa' && <ScheduleOfAssessments study={study} version={version} role={role} {...summaryProps} />}
+              {feature.id === 'sample-size' && <SampleSizePower version={version} role={role} {...summaryProps} />}
+              {feature.id === 'versions' && (
+                <VersionControl study={study} version={version} role={role} legacyDocs={legacyDocs} onRegistered={handleRegistered} {...summaryProps} />
+              )}
+              {feature.id === 'reports' && (
+                <DesignReports study={study} version={version} role={role} {...summaryProps}
+                  documentChat={
+                    <div className="card">
+                      <ChatInterface docId={doc?.id} onSendMessage={handleChat} messages={chatMessages} isLoading={isChatting} embedded />
+                    </div>
+                  } />
+              )}
+            </section>
+          </div>
+        </>
+      )}
     </div>
   );
 }
