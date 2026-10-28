@@ -1,6 +1,6 @@
 const API_BASE = '/api';
 
-function getAuthHeaders(extraHeaders = {}) {
+export function getAuthHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('iclinical_token');
   const headers = { ...extraHeaders };
   if (token) {
@@ -9,7 +9,7 @@ function getAuthHeaders(extraHeaders = {}) {
   return headers;
 }
 
-async function handleResponseError(res, fallbackMessage) {
+export async function handleResponseError(res, fallbackMessage) {
   let errMsg = fallbackMessage;
   try {
     const contentType = res.headers.get('content-type');

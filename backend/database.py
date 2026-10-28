@@ -109,6 +109,90 @@ class ContactMessageDB(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     email_sent = Column(Integer, nullable=False, default=0)  # 0 = not sent (queued), 1 = delivered
 
+# ──────────────────────────────────────────────────────────────────────
+# DESIGN workspace models (studies, protocol versions, analysis artifacts)
+# ──────────────────────────────────────────────────────────────────────
+
+class StudyDB(Base):
+    """A clinical study; groups protocol versions and DESIGN outputs."""
+    __tablename__ = "design_studies"
+
+    id = Column(String(50), primary_key=True, index=True)
+    study_code = Column(String(100), nullable=False)  # sponsor/user facing study ID
+    title = Column(Text, nullable=False, default="")
+    sponsor = Column(String(255), nullable=True)
+    therapeutic_area = Column(String(255), nullable=True)
+    owner_id = Column(String(50), nullable=False, index=True)
+    created_at = Column(String(100), nullable=False)
+
+
+class StudyMemberDB(Base):
+    """Per-study access. Roles: owner, reviewer, editor, viewer."""
+    __tablename__ = "design_study_members"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    study_id = Column(String(50), nullable=False, index=True)
+    user_id = Column(String(50), nullable=False, index=True)
+    role = Column(String(20), nullable=False, default="viewer")
+    added_at = Column(String(100), nullable=False)
+
+
+class ProtocolVersionDB(Base):
+    """One registered protocol document version. Rows are never overwritten by a later version."""
+    __tablename__ = "design_protocol_versions"
+
+    id = Column(String(50), primary_key=True, index=True)
+    study_id = Column(String(50), nullable=False, index=True)
+    document_id = Column(String(50), nullable=False)  # documents.id of the original upload
+    sequence = Column(Integer, nullable=False)  # 1, 2, 3 ... registration order within the study
+    version_label = Column(String(100), nullable=True)
+    amendment_number = Column(String(100), nullable=True)
+    effective_date = Column(String(50), nullable=True)
+    amendment_reason = Column(Text, nullable=True)
+    language = Column(String(20), nullable=False, default="en")
+    preferences_json = Column(Text, nullable=False, default="{}")
+    supporting_json = Column(Text, nullable=False, default="[]")  # [{document_id, kind, filename}]
+    file_sha256 = Column(String(64), nullable=False)
+    processing_status = Column(String(30), nullable=False, default="uploaded")
+    processing_progress = Column(Integer, nullable=False, default=0)
+    processing_message = Column(Text, nullable=True)
+    review_status = Column(String(30), nullable=False, default="unverified")
+    created_by = Column(String(50), nullable=False)
+    created_at = Column(String(100), nullable=False)
+
+
+class DesignArtifactDB(Base):
+    """Versioned DESIGN output. Every save inserts a new revision; earlier revisions are kept."""
+    __tablename__ = "design_artifacts"
+
+    id = Column(String(50), primary_key=True, index=True)
+    study_id = Column(String(50), nullable=False, index=True)
+    protocol_version_id = Column(String(50), nullable=True, index=True)
+    kind = Column(String(50), nullable=False, index=True)
+    lineage_id = Column(String(50), nullable=False, index=True)  # shared by all revisions of one artifact
+    revision = Column(Integer, nullable=False, default=1)
+    status = Column(String(30), nullable=False, default="draft")
+    method_version = Column(String(50), nullable=True)
+    data_json = Column(Text, nullable=False)
+    note = Column(Text, nullable=True)
+    created_by = Column(String(50), nullable=False)
+    created_at = Column(String(100), nullable=False)
+
+
+class DesignAuditDB(Base):
+    """Append-only audit trail for DESIGN actions. Holds identifiers and action metadata, not protocol text."""
+    __tablename__ = "design_audit_log"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    study_id = Column(String(50), nullable=True, index=True)
+    protocol_version_id = Column(String(50), nullable=True)
+    user_id = Column(String(50), nullable=False)
+    action = Column(String(80), nullable=False)
+    entity = Column(String(80), nullable=True)
+    detail_json = Column(Text, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
     

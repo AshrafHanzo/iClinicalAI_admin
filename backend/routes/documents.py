@@ -204,6 +204,11 @@ async def delete_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
+    # Registered protocol versions are preserved for traceability and version history
+    from database import ProtocolVersionDB
+    if db.query(ProtocolVersionDB).filter(ProtocolVersionDB.document_id == doc_id).first():
+        raise HTTPException(status_code=409, detail="This document is a registered protocol version in a DESIGN study and cannot be deleted")
+
     # Delete file from disk
     try:
         if doc.get("file_path") and os.path.exists(doc["file_path"]):
